@@ -821,53 +821,35 @@ function clearCacheForDomain(domain) {
     }
 }
         
-        // Função para forçar a atualização do Google Apps Script
-        function forceGoogleAppsScriptUpdate() {
-    // Mostrar a tela de carregamento primeiro
+       function forceGoogleAppsScriptUpdate() {
+    // Mostrar a tela de carregamento
     loadingScreen.style.display = 'flex';
+    
+    // Adicionar classe para mostrar animação
+    refreshButton.classList.add('refreshing');
+    
+    // Mostrar toast
+    showToast('Atualizando aplicativo...');
+    
+    // Obter o iframe
+    const iframe = document.getElementById('app-frame');
     
     // Adicionar timestamp para evitar cache
     const timestamp = new Date().getTime();
-    const currentSrc = appFrame.src;
-    const baseUrl = currentSrc.split('?')[0];
+    const currentSrc = iframe.src.split('?')[0]; // Remove parâmetros existentes
     
-    // Remover o iframe atual
-    const frameContainer = document.getElementById('frame-container');
-    frameContainer.innerHTML = '';
+    // Atualizar o src com novo timestamp
+    iframe.src = `${currentSrc}?nocache=${timestamp}`;
     
-    // Criar um novo iframe com a URL atualizada
-    const newFrame = document.createElement('iframe');
-    newFrame.id = 'app-frame';
-    newFrame.src = `${baseUrl}?t=${timestamp}&nocache=true`;
-    newFrame.allow = "autoplay; camera; microphone; fullscreen";
-    newFrame.allowFullscreen = true;
-    newFrame.loading = "eager";
-    newFrame.sandbox = "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-top-navigation";
-    
-    // Adicionar evento de carregamento ao novo iframe
-    newFrame.onload = function() {
-        console.log('Novo frame carregado com sucesso');
+    // Configurar evento de carregamento
+    iframe.onload = function() {
+        console.log('Aplicativo atualizado com sucesso');
         setTimeout(hideLoadingScreen, 100);
+        refreshButton.classList.remove('refreshing');
+        showToast('Aplicativo atualizado com sucesso!');
     };
-    
-    // Adicionar evento de erro ao novo iframe
-    newFrame.onerror = function() {
-        console.error('Erro ao carregar o novo iframe');
-        if (navigator.onLine) {
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-        } else {
-            showOfflineMessage();
-        }
-    };
-    
-    // Adicionar o novo iframe ao container
-    frameContainer.appendChild(newFrame);
-    
-    // Atualizar a referência global ao iframe
-    appFrame = newFrame;
 }
+
 
         
         // Função para mostrar toast de notificação
